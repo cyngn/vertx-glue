@@ -61,8 +61,8 @@ public class CyngnLauncher extends Launcher {
         super.afterStartingVertx(vertx);
         Promise.newInstance(vertx).all(
             (context, onResult) -> handleConfig(vertx, onResult),
-            (context, onResult) -> handleCassandra(vertx, config, onResult),
-            (context, onResult) -> handleKafka(vertx, config, onResult)
+            (context, onResult) -> handleCassandra(vertx, onResult),
+            (context, onResult) -> handleKafka(vertx, onResult)
         ).done(context -> vertx.eventBus().publish(Constants.LAUNCH_MESSAGE, new JsonObject()))
         .except(context -> vertx.close())
         .timeout(10000) // 10 seconds
@@ -73,10 +73,9 @@ public class CyngnLauncher extends Launcher {
      * Handles initializing Cassandra and shoving it in shared data
      *
      * @param vertx the vertx instance to initialize cassandra with
-     * @param config the config holding the cassandra config
      * @param onComplete did the step succeed or fail
      */
-    protected void handleCassandra(Vertx vertx, JsonObject config, Consumer<Boolean> onComplete) {
+    protected void handleCassandra(Vertx vertx, Consumer<Boolean> onComplete) {
         JsonObject cassandraConfig = config.getJsonObject(Constants.CASSANDRA_KEY);
         if (cassandraConfig != null) {
             CassandraSession session = new DefaultCassandraSession(
@@ -100,10 +99,9 @@ public class CyngnLauncher extends Launcher {
      * Handles supporting deploying the consumer and producer kafka verticles
      *
      * @param vertx the vertx instance to use to deploy the kafka verticle instances
-     * @param config the config to check for kafka options
      * @param onComplete did the step succeed or fail
      */
-    protected void handleKafka(Vertx vertx, JsonObject config, Consumer<Boolean> onComplete) {
+    protected void handleKafka(Vertx vertx, Consumer<Boolean> onComplete) {
         JsonObject kafkaConsumerConfig = config.getJsonObject(Constants.KAFKA_CONSUMER_KEY);
         JsonObject kafkaProducerConfig = config.getJsonObject(Constants.KAFKA_PRODUCER_KEY);
 
