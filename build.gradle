@@ -1,0 +1,63 @@
+apply plugin: 'java'
+// Uncomment below when doing official builds
+//apply from: "gradle/sona.gradle"
+
+version = '3.3.0'
+group = "com.cyngn.vertx"
+archivesBaseName = "vertx-glue"
+
+if (!JavaVersion.current().java8Compatible) {
+    throw new IllegalStateException('''A Haiku:
+                                      |  This needs Java 8,
+                                      |  You are using something else,
+                                      |  Refresh. Try again.'''.stripMargin())
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'http://oss.sonatype.org/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    compile 'io.vertx:vertx-core:3.3.0-SNAPSHOT'
+    compile "org.apache.commons:commons-lang3:3.4"
+    compile "io.vertx:vertx-codegen:3.3.0-SNAPSHOT"
+    compile "com.cyngn.vertx:vertx-util:0.6.0"
+    compile "com.englishtown.vertx:vertx-cassandra:3.2.0"
+    compile "com.englishtown.vertx:vertx-cassandra-mapping:3.2.0"
+    compile "com.cyngn.vertx:vertx-util:3.3.0-SNAPSHOT"
+    compile "com.cyngn.vertx:vertx-kafka:3.3.0-SNAPSHOT"
+    compile "com.cyngn.vertx:vertx-opentsdb:3.3.0-SNAPSHOT"
+    testCompile "junit:junit:4.11"
+    testCompile "io.vertx:vertx-unit:3.3.0-SNAPSHOT"
+    testCompile 'io.vertx:vertx-core:3.3.0-SNAPSHOT:tests'
+    testCompile "org.mockito:mockito-core:1.9.5"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.12'
+}
+
+task release() << {}
+
+gradle.taskGraph.whenReady {taskGraph ->
+    if (!taskGraph.hasTask(release)) {
+        version += '-SNAPSHOT'
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
